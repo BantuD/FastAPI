@@ -46,12 +46,16 @@ def create_post(post: schemas.PostCreate, db: Session=Depends(get_db),user = Dep
 
 @router.delete('/{id}',status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int,db: Session = Depends(get_db),user = Depends(oauth2.get_current_user)):
-    post = db.query(models.Post).filter(models.Post.id == id)
-
-    if not post.first():
+    post_query = db.query(models.Post).filter(models.Post.id == id)
+    post = post_query.first()
+    if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Post not found')
     
-    post.delete(synchronize_session=False)
+    if post.owner_id != user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail=f'Not Authorized to perform this action')
+    
+
+    post_query.delete(synchronize_session=False)
     db.commit()
 
 
