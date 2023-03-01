@@ -16,6 +16,7 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool
+    owner_id:int
 
     class Config:  #because we're using it as pydantic model
         orm_mode = True
