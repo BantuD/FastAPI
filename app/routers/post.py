@@ -62,6 +62,7 @@ def delete_post(id: int,db: Session = Depends(get_db),user = Depends(oauth2.get_
 @router.put('/{id}',response_model=schemas.Post)
 def update_post(id: int,new_post: schemas.UpdatePost,db: Session = Depends(get_db),user = Depends(oauth2.get_current_user)): #keep post name different than class Post 
     
+ 
     postQuery = db.query(models.Post).filter(models.Post.id == id)
     post = postQuery.first()
     if not post:
@@ -70,7 +71,7 @@ def update_post(id: int,new_post: schemas.UpdatePost,db: Session = Depends(get_d
     if post.owner_id != user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail=f'Unauthorized user')
     
-    
+
     postQuery.update(new_post.dict(),synchronize_session=False)
     db.commit()
     print(postQuery.first())
