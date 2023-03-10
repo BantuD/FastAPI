@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from .database import engine
-from sqlalchemy.orm import Session
 from . import models
 from .routers import post,user,auth
+from .config import settings
 
 models.Base.metadata.create_all(bind=engine) #Create the table if doesn't exist
 

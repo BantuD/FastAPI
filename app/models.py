@@ -21,4 +21,10 @@ class Post(Base):
     published = Column(Boolean,default=True,nullable=False)
     created_at = Column(TIMESTAMP(timezone=True),nullable=False,server_default=text('now()'))
     owner_id = Column(Integer,ForeignKey("users.id",ondelete="CASCADE"),nullable=False)
-    owner = relationship("User")
+    owner = relationship("User")  #Extract the data of user with user_id = owner_id
+
+
+class Vote(Base):
+    __tablename__="votes"
+    user_id = Column(Integer,ForeignKey("users.id",ondelete="CASCADE"),nullable=False,primary_key=True)
+    post_id: user_id = Column(Integer,ForeignKey("posts.id",ondelete="CASCADE"),nullable=False,primary_key=True)
