@@ -1,4 +1,4 @@
-from pydantic import BaseModel,EmailStr
+from pydantic import BaseModel,EmailStr, conint
 from datetime import datetime
 from typing import Optional
 
@@ -42,6 +42,7 @@ class Post(BaseModel):
     published: bool
     owner_id:int
     owner:UserOut
+    total_voates:int=0 # defalt value is zero votes
 
     class Config:  #because we're using it as pydantic model
         orm_mode = True
@@ -63,3 +64,9 @@ class Token(BaseModel):
     access_token: str
     token_type:str
     
+
+#vote
+
+class Votes(BaseModel):
+    post_id: int
+    dir: conint(le=1)

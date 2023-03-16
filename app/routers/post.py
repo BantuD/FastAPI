@@ -4,6 +4,8 @@ from .. import database,models,schemas
 from ..database import get_db
 from typing import List,Optional
 from .. import oauth2
+from sqlalchemy import func
+
 router = APIRouter(
     prefix="/posts",
     tags=['Posts']
@@ -14,7 +16,9 @@ def get_posts(db: Session = Depends(get_db),user = Depends(oauth2.get_current_us
               limit:int=10,skip:int=0,search: Optional[str]=""):
     
     posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
-
+    result = db.query(models.Post,func.count(models.Vote.post_id).label("votes")).join(models.Vote,models.Vote.post_id == 
+                                                                        models.Vote.post_id,isouter=True).group_by(models.Post.id)
+    print(result)
     return posts
 
 @router.get('/{id}',response_model=schemas.Post)
@@ -27,6 +31,9 @@ def getOnePost(id: int,db: Session = Depends(get_db),user = Depends(oauth2.get_c
     if not thepost:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'post with id:{id} not found')
     
+    votes = db.query(models.Vote).filter(models.Vote.post_id == id).count()
+
+    thepost.total_votes=votes
     return thepost
 
 @router.post('/',status_code=status.HTTP_201_CREATED,response_model=schemas.Post)
