@@ -42,9 +42,16 @@ class Post(BaseModel):
     published: bool
     owner_id:int
     owner:UserOut
-    total_voates:int=0 # defalt value is zero votes
+   
 
     class Config:  #because we're using it as pydantic model
+        orm_mode = True
+
+class PostWithVotes(BaseModel):
+    Post:Post
+    votes: int
+
+    class Config:
         orm_mode = True
 
 class UpdatePost(BaseModel):
