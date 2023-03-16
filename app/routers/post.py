@@ -18,12 +18,14 @@ def get_posts(db: Session = Depends(get_db),user = Depends(oauth2.get_current_us
     
     posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
 
-    result = db.query(models.Post,func.count(models.Vote.post_id).label("votes")).join(models.Vote,models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).all()
+    result = db.query(models.Post,func.count(models.Vote.post_id).label("votes")).join(
+        models.Vote,models.Vote.post_id == models.Post.id, isouter=True).group_by(
+        models.Post.id).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
    
     print(result)
     return result
 
-@router.get('/{id}',response_model=schemas.Post)
+@router.get('/{id}',response_model=schemas.PostWithVotes)
 def getOnePost(id: int,db: Session = Depends(get_db),user = Depends(oauth2.get_current_user)):
 
     postQuery = db.query(models.Post).filter(models.Post.id == id)
@@ -33,10 +35,13 @@ def getOnePost(id: int,db: Session = Depends(get_db),user = Depends(oauth2.get_c
     if not thepost:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'post with id:{id} not found')
     
-    votes = db.query(models.Vote).filter(models.Vote.post_id == id).count()
+    # votes = db.query(models.Vote).filter(models.Vote.post_id == id).count()
+    
+    result = db.query(models.Post,func.count(models.Vote.post_id).label("votes")).join(
+        models.Vote,models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.id == id).first()
 
-    thepost.total_votes=votes
-    return thepost
+
+    return result
 
 @router.post('/',status_code=status.HTTP_201_CREATED,response_model=schemas.Post)
 def create_post(post: schemas.PostCreate, db: Session=Depends(get_db),user = Depends(oauth2.get_current_user)):
