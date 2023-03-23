@@ -12,6 +12,7 @@ class User(Base):
     email = Column(String,nullable=False,unique=True)
     password = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('Now()'))
+    phone_number = Column(Integer,nullable=True)
 
 class Post(Base):
     __tablename__='posts'
